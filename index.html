@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Wayfarer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+/* ── RESET & BASE ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;width:100%;font-family:'DM Sans',sans-serif;background:#060a12;color:#f5f0e8;overflow:hidden}
+
+/* ── SPLASH ── */
+#splash{
+  position:fixed;inset:0;z-index:9999;
+  background:#060a12;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:16px;
+  transition:opacity .8s ease;
+}
+#splash.hide{opacity:0;pointer-events:none}
+.splash-star{font-size:48px;color:#c9a84c;animation:pulse 1.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.15);opacity:.7}}
+.splash-title{font-family:'Playfair Display',serif;font-size:42px;font-weight:700;color:#f5f0e8;letter-spacing:-.5px}
+.splash-sub{font-size:14px;color:rgba(245,240,232,.4);letter-spacing:2px;text-transform:uppercase}
+
+/* ── HEADER ── */
+.hdr{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:13px 22px;
+  background:rgba(6,10,18,.9);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(201,168,76,.15);
+}
+.logo{display:flex;align-items:center;gap:9px}
+.logo-star{color:#c9a84c;font-size:18px;display:inline-block;animation:spin 9s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.logo-text{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#f5f0e8;letter-spacing:-.3px}
+.nav{display:flex;gap:9px;align-items:center}
+.btn-g{
+  background:none;border:1px solid rgba(245,240,232,.2);
+  padding:7px 16px;border-radius:100px;
+  font-family:'DM Sans',sans-serif;font-size:12px;
+  cursor:pointer;color:rgba(245,240,232,.65);
+  transition:.25s ease;
+}
+.btn-g:hover{border-color:#c9a84c;color:#c9a84c}
+.btn-p{
+  background:#c9a84c;color:#1a1612;border:none;
+  padding:7px 18px;border-radius:100px;
+  font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;
+  cursor:pointer;transition:.25s ease;
+}
+.btn-p:hover{background:#f5f0e8}
+
+/* ── GLOBE CONTAINER ── */
+#globe-wrap{
+  position:fixed;inset:0;top:54px;z-index:0;
+  background:radial-gradient(ellipse at center,#0d1829 0%,#060a12 70%);
+}
+
+/* ── LEGEND ── */
+.legend{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  z-index:1000;display:flex;gap:4px;
+  background:rgba(6,10,18,.85);backdrop-filter:blur(12px);
+  padding:7px 14px;border-radius:100px;
+  border:1px solid rgba(201,168,76,.2);
+  box-shadow:0 4px 24px rgba(0,0,0,.5);
+}
+.leg{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:500;color:rgba(245,240,232,.5);padding:4px 10px;border-radius:100px;cursor:pointer;transition:.2s ease;user-select:none}
+.leg:hover,.leg.active{background:rgba(201,168,76,.15);color:#c9a84c}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.d-all{background:#c9a84c}.d-vis{background:#52b788}.d-liv{background:#e63946}.d-wis{background:#457b9d}
+
+/* ── TOOLTIP ── */
+#tip{
+  position:fixed;z-index:2000;pointer-events:none;
+  background:rgba(6,10,18,.96);border:1px solid rgba(201,168,76,.25);
+  border-radius:10px;padding:10px 14px;backdrop-filter:blur(12px);
+  opacity:0;transition:opacity .15s ease;max-width:190px;
+}
+#tip.show{opacity:1}
+.tc{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:#f5f0e8}
+.tk{font-size:10px;color:rgba(245,240,232,.42);margin-top:2px}
+.tb{display:inline-block;margin-top:6px;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;padding:2px 7px;border-radius:100px}
+.tb-visited{background:rgba(82,183,136,.2);color:#52b788}
+.tb-lived{background:rgba(230,57,70,.15);color:#e63946}
+.tb-wishlist{background:rgba(69,123,157,.2);color:#457b9d}
+.tn{margin-top:5px;font-size:10px;font-style:italic;color:rgba(245,240,232,.38)}
+
+/* ── SIDE PANEL ── */
+.panel{
+  position:fixed;top:54px;right:0;bottom:0;width:320px;z-index:900;
+  background:rgba(6,10,18,.94);backdrop-filter:blur(24px);
+  border-left:1px solid rgba(201,168,76,.15);
+  padding:24px;overflow-y:auto;
+  transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);
+  box-shadow:-8px 0 40px rgba(0,0,0,.5);
+}
+.panel.open{transform:translateX(0)}
+.ph{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.pt{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#f5f0e8}
+.px{background:none;border:none;font-size:15px;cursor:pointer;color:rgba(245,240,232,.35);width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:.2s ease}
+.px:hover{background:rgba(245,240,232,.08);color:#f5f0e8}
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px}
+.sc{background:rgba(245,240,232,.04);border-radius:11px;padding:16px 14px;border:1px solid rgba(201,168,76,.1);text-align:center}
+.sn{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:#c9a84c;line-height:1}
+.sl{font-size:10px;font-weight:500;color:rgba(245,240,232,.32);text-transform:uppercase;letter-spacing:.8px;margin-top:4px}
+.pl{display:flex;flex-direction:column;gap:7px}
+.pi{display:flex;align-items:center;gap:11px;padding:11px 13px;background:rgba(245,240,232,.03);border-radius:9px;border:1px solid rgba(201,168,76,.07);cursor:pointer;transition:.2s ease;animation:sIn .3s ease both}
+@keyframes sIn{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:translateX(0)}}
+.pi:hover{border-color:rgba(201,168,76,.3);background:rgba(201,168,76,.05)}
+.psd{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.pi-info{flex:1;min-width:0}
+.pi-city{font-size:13px;font-weight:500;color:#f5f0e8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pi-country{font-size:10px;color:rgba(245,240,232,.36);margin-top:1px}
+.pdel{background:none;border:none;font-size:11px;cursor:pointer;color:transparent;transition:.2s ease;padding:3px}
+.pi:hover .pdel{color:#e63946}
+
+/* ── MODAL ── */
+.mo{
+  position:fixed;inset:0;z-index:2000;
+  background:rgba(0,0,0,.75);backdrop-filter:blur(6px);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .3s ease;
+}
+.mo.open{opacity:1;pointer-events:all}
+.modal{
+  background:#0f1520;border:1px solid rgba(201,168,76,.18);
+  border-radius:20px;padding:28px;width:420px;max-width:calc(100vw - 28px);
+  box-shadow:0 24px 80px rgba(0,0,0,.7);
+  transform:translateY(18px) scale(.97);transition:transform .3s ease;
+  max-height:calc(100vh - 56px);overflow-y:auto;
+}
+.mo.open .modal{transform:translateY(0) scale(1)}
+.mh{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.mt{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#f5f0e8}
+.mc{background:none;border:none;font-size:15px;cursor:pointer;color:rgba(245,240,232,.35);width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:.2s ease}
+.mc:hover{background:rgba(245,240,232,.08);color:#f5f0e8}
+/* search */
+.sw{position:relative;margin-bottom:14px}
+.ci{width:100%;padding:11px 15px;border:2px solid rgba(245,240,232,.1);border-radius:14px;font-family:'DM Sans',sans-serif;font-size:14px;background:rgba(245,240,232,.05);color:#f5f0e8;outline:none;transition:border-color .2s ease}
+.ci:focus{border-color:#c9a84c}
+.ci::placeholder{color:rgba(245,240,232,.25)}
+.sr{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#0f1520;border:1px solid rgba(201,168,76,.2);border-radius:9px;box-shadow:0 8px 32px rgba(0,0,0,.6);z-index:100;max-height:200px;overflow-y:auto;display:none}
+.sri{padding:11px 15px;cursor:pointer;border-bottom:1px solid rgba(245,240,232,.05);transition:background .15s ease}
+.sri:last-child{border-bottom:none}
+.sri:hover{background:rgba(201,168,76,.1)}
+.rc{font-size:13px;font-weight:500;color:#f5f0e8}
+.rco{font-size:11px;color:rgba(245,240,232,.38);margin-top:2px}
+/* selected badge */
+.sp{display:flex;align-items:center;justify-content:space-between;background:rgba(201,168,76,.07);border:2px solid rgba(201,168,76,.4);border-radius:14px;padding:11px 15px;margin-bottom:14px;animation:pIn .22s ease}
+@keyframes pIn{from{transform:scale(.95);opacity:0}to{transform:scale(1);opacity:1}}
+.sc2{font-size:15px;font-weight:600;color:#f5f0e8}
+.sco{font-size:11px;color:rgba(245,240,232,.42);margin-top:2px}
+.cs{background:none;border:none;font-size:13px;cursor:pointer;color:rgba(245,240,232,.35);padding:3px;transition:.2s ease}
+.cs:hover{color:#e63946}
+/* status picker */
+.pkl{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.7px;color:rgba(245,240,232,.32);margin-bottom:8px}
+.so{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:14px}
+.sopt{display:flex;flex-direction:column;align-items:center;padding:13px 6px;border-radius:11px;border:2px solid rgba(245,240,232,.07);cursor:pointer;transition:.2s ease;background:rgba(245,240,232,.03);text-align:center}
+.sopt input{display:none}
+.sopt:hover{border-color:rgba(201,168,76,.4)}
+.sopt[data-s="visited"]:has(input:checked){border-color:#52b788;background:rgba(82,183,136,.08)}
+.sopt[data-s="lived"]:has(input:checked){border-color:#e63946;background:rgba(230,57,70,.08)}
+.sopt[data-s="wishlist"]:has(input:checked){border-color:#457b9d;background:rgba(69,123,157,.08)}
+.si{font-size:20px;margin-bottom:5px}
+.sn2{font-size:11px;font-weight:600;color:#f5f0e8}
+.sd{font-size:9px;color:rgba(245,240,232,.35);margin-top:2px}
+/* notes */
+.nw{margin-bottom:18px}
+.ni{width:100%;height:64px;padding:9px 13px;border:2px solid rgba(245,240,232,.08);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:12px;color:#f5f0e8;background:rgba(245,240,232,.04);resize:none;outline:none;transition:border-color .2s ease}
+.ni:focus{border-color:#c9a84c}
+.ni::placeholder{color:rgba(245,240,232,.2);font-style:italic}
+/* save btn */
+.bs{width:100%;padding:13px;background:#c9a84c;color:#1a1612;border:none;border-radius:11px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:.2s ease}
+.bs:hover{background:#f5f0e8}
+.bs:active{transform:scale(.98)}
+
+/* ── TOAST ── */
+#toast{
+  position:fixed;bottom:70px;left:50%;
+  transform:translateX(-50%) translateY(16px);
+  background:#c9a84c;color:#1a1612;
+  padding:9px 20px;border-radius:100px;
+  font-size:12px;font-weight:600;
+  z-index:9999;opacity:0;
+  transition:all .28s ease;pointer-events:none;white-space:nowrap;
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:rgba(201,168,76,.2);border-radius:100px}
+
+/* ── MOBILE ── */
+@media(max-width:600px){
+  .panel{width:100%}
+  .modal{padding:22px 18px}
+  .legend span:not(.dot){display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+  <span class="splash-star">✦</span>
+  <div class="splash-title">Wayfarer</div>
+  <div class="splash-sub">Your World, Your Story</div>
+</div>
+
+<!-- HEADER -->
+<header class="hdr">
+  <div class="logo">
+    <span class="logo-star">✦</span>
+    <span class="logo-text">Wayfarer</span>
+  </div>
+  <div class="nav">
+    <button class="btn-g" id="btn-stats">Stats</button>
+    <button class="btn-p" id="btn-add">+ Add Place</button>
+  </div>
+</header>
+
+<!-- GLOBE -->
+<div id="globe-wrap"></div>
+
+<!-- LEGEND -->
+<div class="legend">
+  <div class="leg active" data-f="all"><span class="dot d-all"></span><span>All</span></div>
+  <div class="leg" data-f="visited"><span class="dot d-vis"></span><span>Visited</span></div>
+  <div class="leg" data-f="lived"><span class="dot d-liv"></span><span>Lived</span></div>
+  <div class="leg" data-f="wishlist"><span class="dot d-wis"></span><span>Wishlist</span></div>
+</div>
+
+<!-- STATS PANEL -->
+<div class="panel" id="panel">
+  <div class="ph">
+    <h2 class="pt">Your World</h2>
+    <button class="px" id="close-panel">✕</button>
+  </div>
+  <div class="sg">
+    <div class="sc"><div class="sn" id="s-cities">0</div><div class="sl">Cities</div></div>
+    <div class="sc"><div class="sn" id="s-countries">0</div><div class="sl">Countries</div></div>
+    <div class="sc"><div class="sn" id="s-visited">0</div><div class="sl">Visited</div></div>
+    <div class="sc"><div class="sn" id="s-wish">0</div><div class="sl">Wishlist</div></div>
+  </div>
+  <div class="pl" id="plist"></div>
+</div>
+
+<!-- ADD MODAL -->
+<div class="mo" id="mo">
+  <div class="modal">
+    <div class="mh">
+      <h2 class="mt">Add a Place</h2>
+      <button class="mc" id="mc">✕</button>
+    </div>
+    <div class="sw">
+      <input type="text" id="ci" class="ci" placeholder="Search city… e.g. Tokyo, Milan, Lisbon" autocomplete="off"/>
+      <div class="sr" id="sr"></div>
+    </div>
+    <div class="sp" id="selp" style="display:none">
+      <div>
+        <div class="sc2" id="sel-city"></div>
+        <div class="sco" id="sel-country"></div>
+      </div>
+      <button class="cs" id="cs">✕</button>
+    </div>
+    <p class="pkl">How do you know this place?</p>
+    <div class="so">
+      <label class="sopt" data-s="visited"><input type="radio" name="st" value="visited"><span class="si">🌍</span><span class="sn2">Visited</span><span class="sd">Been there</span></label>
+      <label class="sopt" data-s="lived"><input type="radio" name="st" value="lived"><span class="si">🏠</span><span class="sn2">Lived</span><span class="sd">Called home</span></label>
+      <label class="sopt" data-s="wishlist"><input type="radio" name="st" value="wishlist"><span class="si">⭐</span><span class="sn2">Wishlist</span><span class="sd">Dream spot</span></label>
+    </div>
+    <div class="nw">
+      <textarea id="notes" class="ni" placeholder="A memory, a feeling… (optional)"></textarea>
+    </div>
+    <button class="bs" id="save">Save Place</button>
+  </div>
+</div>
+
+<!-- TOOLTIP -->
+<div id="tip"></div>
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- Globe.gl: caricato con due fallback CDN -->
+<script>
+(function loadGlobe() {
+  var urls = [
+    'https://unpkg.com/globe.gl@2.30.0/dist/globe.gl.min.js',
+    'https://cdn.jsdelivr.net/npm/globe.gl@2.30.0/dist/globe.gl.min.js'
+  ];
+  var idx = 0;
+  function tryLoad() {
+    if (idx >= urls.length) {
+      document.getElementById('globe-wrap').innerHTML =
+        '<p style="color:rgba(245,240,232,.4);text-align:center;padding-top:40vh;font-size:13px">Could not load 3D globe — check your internet connection.</p>';
+      window.__globeFailed = true;
+      return;
+    }
+    var s = document.createElement('script');
+    s.src = urls[idx++];
+    s.onload = function() { if (typeof Globe !== 'undefined') initApp(); else tryLoad(); };
+    s.onerror = tryLoad;
+    document.head.appendChild(s);
+  }
+  tryLoad();
+})();
+</script>
+
+<script>
+/* ======================================================
+   WAYFARER — app logic (runs after Globe.gl is loaded)
+   ====================================================== */
+
+var globe = null;
+var places = [];
+var activeFilter = 'all';
+var searchTimer = null;
+var sel = null;
+
+var STATUS_COLOR = {
+  visited:  '#52b788',
+  lived:    '#e63946',
+  wishlist: '#457b9d'
+};
+
+function $(id) { return document.getElementById(id); }
+
+function save() {
+  localStorage.setItem('wf_places', JSON.stringify(places));
+}
+
+function showToast(msg) {
+  var t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 2200);
+}
+
+/* ── GLOBE ── */
+function initGlobe() {
+  if (window.__globeFailed) return;
+  var wrap = $('globe-wrap');
+
+  globe = Globe()
+    .globeImageUrl('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
+    .bumpImageUrl('https://unpkg.com/three-globe/example/img/earth-topology.png')
+    .backgroundImageUrl('https://unpkg.com/three-globe/example/img/night-sky.png')
+    .atmosphereColor('#3a6fbf')
+    .atmosphereAltitude(0.18)
+    .pointsData([])
+    .pointLat('lat')
+    .pointLng('lng')
+    .pointColor(function(d){ return STATUS_COLOR[d.status] || '#c9a84c'; })
+    .pointAltitude(0.025)
+    .pointRadius(function(d){ return d.status === 'lived' ? 0.65 : 0.48; })
+    .pointsMerge(false)
+    .onPointHover(onHover)
+    .onPointClick(onPointClick)
+    (wrap);
+
+  function resize() {
+    globe.width(window.innerWidth).height(window.innerHeight - 54);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  globe.controls().autoRotate = true;
+  globe.controls().autoRotateSpeed = 0.35;
+  globe.controls().enableZoom = true;
+  globe.controls().minDistance = 150;
+  globe.controls().maxDistance = 600;
+}
+
+/* ── TOOLTIP ── */
+var tip = $('tip');
+
+function onHover(point, coords, evt) {
+  if (!point) { tip.classList.remove('show'); return; }
+  tip.innerHTML =
+    '<div class="tc">' + point.city + '</div>' +
+    '<div class="tk">' + point.country + '</div>' +
+    '<span class="tb tb-' + point.status + '">' + point.status + '</span>' +
+    (point.notes ? '<div class="tn">' + point.notes + '</div>' : '');
+  if (evt) {
+    tip.style.left = (evt.clientX + 16) + 'px';
+    tip.style.top  = (evt.clientY - 10) + 'px';
+  }
+  tip.classList.add('show');
+}
+
+$('globe-wrap').addEventListener('mousemove', function(evt) {
+  if (tip.classList.contains('show')) {
+    tip.style.left = (evt.clientX + 16) + 'px';
+    tip.style.top  = (evt.clientY - 10) + 'px';
+  }
+});
+
+function onPointClick(point) {
+  if (!point || !globe) return;
+  globe.controls().autoRotate = false;
+  globe.pointOfView({ lat: point.lat, lng: point.lng, altitude: 1.5 }, 800);
+}
+
+/* ── RENDER ── */
+function renderGlobe() {
+  if (!globe) return;
+  var data = activeFilter === 'all'
+    ? places
+    : places.filter(function(p){ return p.status === activeFilter; });
+  globe.pointsData(data);
+}
+
+/* ── STATS ── */
+function updateStats() {
+  var countries = {};
+  places.forEach(function(p){ countries[p.country] = 1; });
+  $('s-cities').textContent    = places.length;
+  $('s-countries').textContent = Object.keys(countries).length;
+  $('s-visited').textContent   = places.filter(function(p){ return p.status === 'visited' || p.status === 'lived'; }).length;
+  $('s-wish').textContent      = places.filter(function(p){ return p.status === 'wishlist'; }).length;
+}
+
+function renderList() {
+  var pl = $('plist');
+  pl.innerHTML = '';
+  var arr = activeFilter === 'all' ? places : places.filter(function(p){ return p.status === activeFilter; });
+  if (!arr.length) {
+    pl.innerHTML = '<p style="text-align:center;color:rgba(245,240,232,.28);font-size:12px;padding:18px 0;font-style:italic">No places yet…</p>';
+    return;
+  }
+  arr.forEach(function(p, i) {
+    var d = document.createElement('div');
+    d.className = 'pi';
+    d.style.animationDelay = (i * 35) + 'ms';
+    d.innerHTML =
+      '<span class="psd" style="background:' + STATUS_COLOR[p.status] + '"></span>' +
+      '<div class="pi-info">' +
+        '<div class="pi-city">' + p.city + '</div>' +
+        '<div class="pi-country">' + p.country + ' · <em>' + p.status + '</em></div>' +
+      '</div>' +
+      '<button class="pdel">✕</button>';
+
+    d.addEventListener('click', function(e) {
+      if (e.target.classList.contains('pdel')) return;
+      if (globe) {
+        globe.controls().autoRotate = false;
+        globe.pointOfView({ lat: p.lat, lng: p.lng, altitude: 1.5 }, 900);
+      }
+    });
+    d.querySelector('.pdel').addEventListener('click', function(e) {
+      e.stopPropagation();
+      places = places.filter(function(x){ return x.id !== p.id; });
+      save(); renderGlobe(); updateStats(); renderList();
+      showToast('Place removed');
+    });
+    pl.appendChild(d);
+  });
+}
+
+/* ── FILTER ── */
+document.querySelectorAll('.leg').forEach(function(el) {
+  el.addEventListener('click', function() {
+    document.querySelectorAll('.leg').forEach(function(x){ x.classList.remove('active'); });
+    el.classList.add('active');
+    activeFilter = el.dataset.f;
+    renderGlobe(); renderList();
+  });
+});
+
+/* ── MODAL ── */
+function openModal() {
+  $('mo').classList.add('open');
+  if (globe) globe.controls().autoRotate = false;
+  setTimeout(function(){ $('ci').focus(); }, 200);
+}
+function closeModal() {
+  $('mo').classList.remove('open');
+  var ci = $('ci');
+  ci.value = ''; ci.style.display = 'block';
+  $('sr').style.display = 'none';
+  $('selp').style.display = 'none';
+  sel = null;
+  $('notes').value = '';
+  document.querySelectorAll('input[name="st"]').forEach(function(r){ r.checked = false; });
+}
+$('btn-add').addEventListener('click', openModal);
+$('mc').addEventListener('click', closeModal);
+$('mo').addEventListener('click', function(e){ if (e.target === $('mo')) closeModal(); });
+
+/* ── PANEL ── */
+$('btn-stats').addEventListener('click', function() {
+  $('panel').classList.add('open');
+  updateStats(); renderList();
+});
+$('close-panel').addEventListener('click', function() {
+  $('panel').classList.remove('open');
+});
+
+/* ── SEARCH ── */
+$('ci').addEventListener('input', function() {
+  clearTimeout(searchTimer);
+  var q = $('ci').value.trim();
+  if (q.length < 2) { $('sr').style.display = 'none'; return; }
+  searchTimer = setTimeout(function(){ searchCity(q); }, 380);
+});
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.sw')) $('sr').style.display = 'none';
+});
+
+$('cs').addEventListener('click', function() {
+  sel = null;
+  $('selp').style.display = 'none';
+  var ci = $('ci');
+  ci.style.display = 'block'; ci.value = ''; ci.focus();
+});
+
+function searchCity(q) {
+  var sr = $('sr');
+  var url = 'https://nominatim.openstreetmap.org/search?q=' + encodeURIComponent(q) +
+            '&format=json&limit=6&featuretype=city&addressdetails=1&accept-language=en';
+  fetch(url, { headers: { 'Accept-Language': 'en' } })
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      sr.innerHTML = '';
+      if (!data.length) {
+        sr.innerHTML = '<div class="sri"><div class="rc">No results found</div></div>';
+        sr.style.display = 'block'; return;
+      }
+      data.forEach(function(item) {
+        var a       = item.address || {};
+        var city    = a.city || a.town || a.village || a.municipality || item.display_name.split(',')[0];
+        var state   = a.state   || '';
+        var country = a.country || '';
+        var label   = state ? state + ', ' + country : country;
+        var d = document.createElement('div');
+        d.className = 'sri';
+        d.innerHTML = '<div class="rc">' + city + '</div><div class="rco">' + label + '</div>';
+        d.addEventListener('click', function() {
+          sel = { city: city, country: country, state: state, lat: parseFloat(item.lat), lng: parseFloat(item.lon) };
+          $('sel-city').textContent    = city;
+          $('sel-country').textContent = label;
+          $('selp').style.display      = 'flex';
+          sr.style.display             = 'none';
+          $('ci').value                = '';
+          $('ci').style.display        = 'none';
+        });
+        sr.appendChild(d);
+      });
+      sr.style.display = 'block';
+    })
+    .catch(function() {
+      sr.innerHTML = '<div class="sri"><div class="rc">Connection error</div></div>';
+      sr.style.display = 'block';
+    });
+}
+
+/* ── SAVE ── */
+$('save').addEventListener('click', function() {
+  if (!sel) { showToast('Please select a city first'); return; }
+  var st = document.querySelector('input[name="st"]:checked');
+  if (!st) { showToast('Choose a status first'); return; }
+  var dup = places.find(function(p){ return p.city === sel.city && p.country === sel.country; });
+  if (dup) { showToast(sel.city + ' is already on your map!'); return; }
+
+  var p = {
+    id:      Date.now().toString(),
+    city:    sel.city,
+    country: sel.country,
+    state:   sel.state || '',
+    lat:     sel.lat,
+    lng:     sel.lng,
+    status:  st.value,
+    notes:   $('notes').value.trim(),
+    addedAt: new Date().toISOString()
+  };
+  places.push(p);
+  save(); renderGlobe(); updateStats(); renderList();
+
+  if (globe) {
+    globe.controls().autoRotate = false;
+    globe.pointOfView({ lat: p.lat, lng: p.lng, altitude: 1.8 }, 1000);
+  }
+  closeModal();
+  showToast('✦ ' + p.city + ' added to your map!');
+});
+
+/* ── INIT ── */
+function initApp() {
+  places = JSON.parse(localStorage.getItem('wf_places') || '[]');
+
+  // Splash 3 secondi poi sparisce
+  setTimeout(function() {
+    $('splash').classList.add('hide');
+    setTimeout(function(){ $('splash').style.display = 'none'; }, 800);
+  }, 3000);
+
+  initGlobe();
+  renderGlobe();
+  updateStats();
+}
+</script>
+
+</body>
+</html>
