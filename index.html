@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Wayfarer — Your World, Your Story</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css"/>
+<!-- Globe.gl versione fissa per evitare breaking changes -->
+<script src="https://unpkg.com/globe.gl@2.30.0/dist/globe.gl.min.js"></script>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="logo">
+    <span class="logo-star">✦</span>
+    <span class="logo-text">Wayfarer</span>
+  </div>
+  <div class="nav">
+    <button class="btn-g" id="btn-stats">Stats</button>
+    <button class="btn-p" id="btn-add">+ Add Place</button>
+  </div>
+</header>
+
+<div id="globe-container"></div>
+
+<div class="legend">
+  <div class="leg-item active" data-f="all"><span class="leg-dot d-all"></span><span>All</span></div>
+  <div class="leg-item" data-f="visited"><span class="leg-dot d-visited"></span><span>Visited</span></div>
+  <div class="leg-item" data-f="lived"><span class="leg-dot d-lived"></span><span>Lived</span></div>
+  <div class="leg-item" data-f="wishlist"><span class="leg-dot d-wishlist"></span><span>Wishlist</span></div>
+</div>
+
+<div class="panel" id="panel">
+  <div class="ph">
+    <h2 class="pt">Your World</h2>
+    <button class="pc" id="close-panel">✕</button>
+  </div>
+  <div class="sg">
+    <div class="sc"><div class="sn" id="s-cities">0</div><div class="sl">Cities</div></div>
+    <div class="sc"><div class="sn" id="s-countries">0</div><div class="sl">Countries</div></div>
+    <div class="sc"><div class="sn" id="s-visited">0</div><div class="sl">Visited</div></div>
+    <div class="sc"><div class="sn" id="s-wish">0</div><div class="sl">Wishlist</div></div>
+  </div>
+  <div class="pl" id="plist"></div>
+</div>
+
+<div class="mo" id="mo">
+  <div class="modal">
+    <div class="mh">
+      <h2 class="mt">Add a Place</h2>
+      <button class="mc" id="mc">✕</button>
+    </div>
+    <div class="sw">
+      <input type="text" id="ci" class="ci" placeholder="Search city… e.g. Tokyo, Milan, Lisbon" autocomplete="off"/>
+      <div class="sr" id="sr"></div>
+    </div>
+    <div class="sp" id="selp" style="display:none">
+      <div>
+        <div class="sc2" id="sel-city"></div>
+        <div class="sco" id="sel-country"></div>
+      </div>
+      <button class="cs" id="cs">✕</button>
+    </div>
+    <p class="pkl">How do you know this place?</p>
+    <div class="so">
+      <label class="sopt" data-s="visited"><input type="radio" name="st" value="visited"><span class="si">🌍</span><span class="sn2">Visited</span><span class="sd">Been there</span></label>
+      <label class="sopt" data-s="lived"><input type="radio" name="st" value="lived"><span class="si">🏠</span><span class="sn2">Lived</span><span class="sd">Called home</span></label>
+      <label class="sopt" data-s="wishlist"><input type="radio" name="st" value="wishlist"><span class="si">⭐</span><span class="sn2">Wishlist</span><span class="sd">Dream spot</span></label>
+    </div>
+    <div class="nw">
+      <textarea id="notes" class="ni" placeholder="A memory, a feeling… (optional)"></textarea>
+    </div>
+    <button class="bs" id="save">Save Place</button>
+  </div>
+</div>
+
+<div class="tip" id="tip"></div>
+<div class="toast" id="toast"></div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
