@@ -1,13 +1,26 @@
-# ✦ Wayfarer — Your World, Your Story
+# ✦ Wayfarer
 
-Travel map tracker con globo 3D. Aggiungi città (non solo stati), scegli tra Visited / Lived / Wishlist, aggiungi note.
+**Your World, Your Story** — A beautiful city-based travel map tracker.
 
-## Deploy
-1. Push su GitHub
-2. Import su vercel.com → Deploy
+## Features
+- 🌍 City-level tracking (not just countries)
+- 🔍 Smart city search via OpenStreetMap (no API key needed)
+- 📍 Visited / Lived / Wishlist status
+- 🗺️ Interactive map with custom markers
+- 💬 Notes per place
+- 📊 Stats panel
+- 💾 localStorage persistence
+
+## Deploy on Vercel
+1. Push to GitHub
+2. Import on vercel.com → New Project
+3. Deploy (no build step needed)
+
+## Run locally
+Open `index.html` in any browser.
 
 ## Stack
-- HTML/CSS/JS puro (no framework)
-- Globe.gl (Three.js) per il globo 3D
-- OpenStreetMap Nominatim per la ricerca città
-- localStorage per la persistenza
+- Pure HTML / CSS / JS
+- Leaflet.js
+- OpenStreetMap Nominatim
+- CartoDB Voyager tiles
