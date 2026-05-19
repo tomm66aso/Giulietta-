@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wayfarer — Your World, Your Story</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css" />
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="logo">
+      <span class="logo-icon">✦</span>
+      <span class="logo-text">Wayfarer</span>
+    </div>
+    <nav class="nav-actions">
+      <button class="btn-ghost" id="btn-stats">Stats</button>
+      <button class="btn-primary" id="btn-add">+ Add Place</button>
+    </nav>
+  </header>
+
+  <!-- MAP -->
+  <div id="map"></div>
+
+  <!-- LEGEND -->
+  <div class="legend">
+    <div class="legend-item" data-filter="all">
+      <span class="legend-dot dot-all"></span><span>All</span>
+    </div>
+    <div class="legend-item" data-filter="visited">
+      <span class="legend-dot dot-visited"></span><span>Visited</span>
+    </div>
+    <div class="legend-item" data-filter="lived">
+      <span class="legend-dot dot-lived"></span><span>Lived</span>
+    </div>
+    <div class="legend-item" data-filter="wishlist">
+      <span class="legend-dot dot-wishlist"></span><span>Wishlist</span>
+    </div>
+  </div>
+
+  <!-- STATS PANEL -->
+  <div class="panel" id="stats-panel">
+    <div class="panel-header">
+      <h2 class="panel-title">Your World</h2>
+      <button class="panel-close" id="close-stats">✕</button>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number" id="stat-cities">0</div>
+        <div class="stat-label">Cities</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="stat-countries">0</div>
+        <div class="stat-label">Countries</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="stat-visited">0</div>
+        <div class="stat-label">Visited</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="stat-wishlist">0</div>
+        <div class="stat-label">Wishlist</div>
+      </div>
+    </div>
+    <div class="places-list" id="places-list"></div>
+  </div>
+
+  <!-- ADD PLACE MODAL -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Add a Place</h2>
+        <button class="modal-close" id="modal-close">✕</button>
+      </div>
+
+      <div class="search-wrapper">
+        <input
+          type="text"
+          id="city-search"
+          class="city-input"
+          placeholder="Search city… (e.g. Tokyo, Rome, Buenos Aires)"
+          autocomplete="off"
+        />
+        <div class="search-results" id="search-results"></div>
+      </div>
+
+      <div class="selected-place" id="selected-place" style="display:none">
+        <div class="selected-info">
+          <div class="selected-city" id="sel-city"></div>
+          <div class="selected-country" id="sel-country"></div>
+        </div>
+        <button class="clear-selection" id="clear-selection">✕</button>
+      </div>
+
+      <div class="status-picker">
+        <p class="picker-label">How do you know this place?</p>
+        <div class="status-options">
+          <label class="status-option" data-status="visited">
+            <input type="radio" name="status" value="visited" />
+            <span class="status-icon">🌍</span>
+            <span class="status-name">Visited</span>
+            <span class="status-desc">Been there</span>
+          </label>
+          <label class="status-option" data-status="lived">
+            <input type="radio" name="status" value="lived" />
+            <span class="status-icon">🏠</span>
+            <span class="status-name">Lived</span>
+            <span class="status-desc">Called it home</span>
+          </label>
+          <label class="status-option" data-status="wishlist">
+            <input type="radio" name="status" value="wishlist" />
+            <span class="status-icon">⭐</span>
+            <span class="status-name">Wishlist</span>
+            <span class="status-desc">Dream destination</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="notes-wrapper">
+        <textarea id="place-notes" class="notes-input" placeholder="A memory, a feeling… (optional)"></textarea>
+      </div>
+
+      <button class="btn-save" id="btn-save">Save Place</button>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
